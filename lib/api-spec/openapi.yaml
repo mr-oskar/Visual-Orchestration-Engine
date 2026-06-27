@@ -458,6 +458,8 @@ components:
           type: number
         isCollapsed:
           type: boolean
+        codeContent:
+          type: string
 
     GraphEdge:
       type: object

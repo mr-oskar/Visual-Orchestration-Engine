@@ -15,6 +15,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={IDE} />
+        <Route path="/projects/:id/ide" component={IDE} />
         <Route path="/projects" component={Projects} />
         <Route path="/projects/:id/stats" component={ProjectStats} />
         <Route component={NotFound} />

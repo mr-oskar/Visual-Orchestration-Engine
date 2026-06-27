@@ -115,7 +115,7 @@ export default function Projects() {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
-                      <Link href={`/`} className="hover:underline">
+                      <Link href={`/projects/${project.id}/ide`} className="hover:underline">
                         {project.name}
                       </Link>
                     </CardTitle>

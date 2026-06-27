@@ -101,6 +101,7 @@ router.patch("/projects/:projectId/nodes/:nodeId", async (req, res): Promise<voi
   if (body.positionX !== undefined) updateData.positionX = body.positionX;
   if (body.positionY !== undefined) updateData.positionY = body.positionY;
   if (body.isCollapsed !== undefined) updateData.isCollapsed = body.isCollapsed;
+  if (body.codeContent !== undefined) updateData.codeContent = body.codeContent;
 
   const [updated] = await db
     .update(graphNodesTable)

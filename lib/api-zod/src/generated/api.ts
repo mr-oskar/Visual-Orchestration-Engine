@@ -206,7 +206,8 @@ export const UpdateNodePositionParams = zod.object({
 export const UpdateNodePositionBody = zod.object({
   "positionX": zod.number().optional(),
   "positionY": zod.number().optional(),
-  "isCollapsed": zod.boolean().optional()
+  "isCollapsed": zod.boolean().optional(),
+  "codeContent": zod.string().optional()
 })
 
 export const UpdateNodePositionResponse = zod.object({

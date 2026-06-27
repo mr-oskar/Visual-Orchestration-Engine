@@ -10,4 +10,5 @@ export interface NodePositionUpdate {
   positionX?: number;
   positionY?: number;
   isCollapsed?: boolean;
+  codeContent?: string;
 }
