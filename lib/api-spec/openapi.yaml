@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Servioen Visual Data Engineering IDE API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: projects
+    description: Project management
+  - name: graph
+    description: Visual graph nodes and edges
+  - name: code
+    description: Code sync operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,293 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{projectId}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get project by ID
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /projects/{projectId}/graph:
+    get:
+      operationId: getProjectGraph
+      tags: [graph]
+      summary: Get full visual graph for a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Graph data with nodes and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectGraph"
+
+  /projects/{projectId}/nodes:
+    get:
+      operationId: listNodes
+      tags: [graph]
+      summary: List all nodes in a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GraphNode"
+
+  /projects/{projectId}/nodes/{nodeId}:
+    get:
+      operationId: getNode
+      tags: [graph]
+      summary: Get node details including code and metadata
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Node with code and metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeDetail"
+    patch:
+      operationId: updateNodePosition
+      tags: [graph]
+      summary: Update a node's position on canvas
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodePositionUpdate"
+      responses:
+        "200":
+          description: Updated node
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphNode"
+
+  /projects/{projectId}/edges:
+    get:
+      operationId: listEdges
+      tags: [graph]
+      summary: List all edges in a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of edges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GraphEdge"
+    post:
+      operationId: createEdge
+      tags: [graph]
+      summary: Create a connection between nodes
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EdgeInput"
+      responses:
+        "201":
+          description: Created edge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphEdge"
+
+  /projects/{projectId}/edges/{edgeId}:
+    delete:
+      operationId: deleteEdge
+      tags: [graph]
+      summary: Delete an edge
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: edgeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /projects/{projectId}/nodes/{nodeId}/code:
+    get:
+      operationId: fetchNodeCode
+      tags: [code]
+      summary: Get the source code for a specific node
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Code content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeContent"
+
+  /projects/{projectId}/stats:
+    get:
+      operationId: getProjectStats
+      tags: [projects]
+      summary: Get project statistics
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStats"
+
+  /projects/{projectId}/activity:
+    get:
+      operationId: getProjectActivity
+      tags: [projects]
+      summary: Get recent activity for a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recent activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +327,227 @@ components:
       required:
         - status
 
+    Project:
+      type: object
+      required: [id, name, description, language, createdAt, updatedAt, nodeCount, edgeCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        pythonVersion:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        nodeCount:
+          type: integer
+        edgeCount:
+          type: integer
+
+    ProjectInput:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        language:
+          type: string
+        pythonVersion:
+          type: string
+
+    ProjectGraph:
+      type: object
+      required: [projectId, nodes, edges]
+      properties:
+        projectId:
+          type: integer
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphEdge"
+
+    GraphNode:
+      type: object
+      required: [id, projectId, nodeType, label, filePath, positionX, positionY, width, height]
+      properties:
+        id:
+          type: string
+        projectId:
+          type: integer
+        nodeType:
+          type: string
+          description: "folder | file | class | function"
+        label:
+          type: string
+        filePath:
+          type: string
+        parentNodeId:
+          type: ["string", "null"]
+        positionX:
+          type: number
+        positionY:
+          type: number
+        width:
+          type: number
+        height:
+          type: number
+        inputTypes:
+          type: array
+          items:
+            type: string
+        outputTypes:
+          type: array
+          items:
+            type: string
+        lineNumber:
+          type: ["integer", "null"]
+        complexity:
+          type: ["integer", "null"]
+        isCollapsed:
+          type: boolean
+
+    NodeDetail:
+      type: object
+      required: [node, code, metadata]
+      properties:
+        node:
+          $ref: "#/components/schemas/GraphNode"
+        code:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/NodeMetadata"
+
+    NodeMetadata:
+      type: object
+      required: [type, definedIn, inputs, outputs, complexity, lastModified]
+      properties:
+        type:
+          type: string
+        definedIn:
+          type: string
+        inputs:
+          type: string
+        outputs:
+          type: string
+        usedBy:
+          type: ["string", "null"]
+        complexity:
+          type: string
+        lastModified:
+          type: string
+
+    NodePositionUpdate:
+      type: object
+      properties:
+        positionX:
+          type: number
+        positionY:
+          type: number
+        isCollapsed:
+          type: boolean
+
+    GraphEdge:
+      type: object
+      required: [id, projectId, sourceNodeId, targetNodeId, sourceHandle, targetHandle, edgeType]
+      properties:
+        id:
+          type: string
+        projectId:
+          type: integer
+        sourceNodeId:
+          type: string
+        targetNodeId:
+          type: string
+        sourceHandle:
+          type: string
+        targetHandle:
+          type: string
+        edgeType:
+          type: string
+          description: "dataflow | import | inheritance"
+        dataType:
+          type: ["string", "null"]
+
+    EdgeInput:
+      type: object
+      required: [sourceNodeId, targetNodeId, sourceHandle, targetHandle]
+      properties:
+        sourceNodeId:
+          type: string
+        targetNodeId:
+          type: string
+        sourceHandle:
+          type: string
+        targetHandle:
+          type: string
+        edgeType:
+          type: string
+        dataType:
+          type: string
+
+    CodeContent:
+      type: object
+      required: [nodeId, filePath, code, language]
+      properties:
+        nodeId:
+          type: ["string", "null"]
+        filePath:
+          type: string
+        code:
+          type: string
+        language:
+          type: string
+
+    ProjectStats:
+      type: object
+      required: [projectId, totalNodes, totalEdges, folderCount, fileCount, classCount, functionCount, avgComplexity, highComplexityNodes]
+      properties:
+        projectId:
+          type: integer
+        totalNodes:
+          type: integer
+        totalEdges:
+          type: integer
+        folderCount:
+          type: integer
+        fileCount:
+          type: integer
+        classCount:
+          type: integer
+        functionCount:
+          type: integer
+        avgComplexity:
+          type: number
+        highComplexityNodes:
+          type: integer
+
+    ActivityEvent:
+      type: object
+      required: [id, projectId, eventType, description, nodeId, timestamp]
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        eventType:
+          type: string
+          description: "node_selected | edge_created | edge_deleted | code_edited | node_moved"
+        description:
+          type: string
+        nodeId:
+          type: ["string", "null"]
+        timestamp:
+          type: string
