@@ -27,6 +27,7 @@ import type {
   GraphNode,
   HealthStatus,
   NodeDetail,
+  NodeInput,
   NodePositionUpdate,
   Project,
   ProjectGraph,
@@ -586,6 +587,149 @@ export function useListNodes<TData = Awaited<ReturnType<typeof listNodes>>, TErr
 
 
 
+
+export const getCreateNodeUrl = (projectId: number,) => {
+
+
+
+
+  return `/api/projects/${projectId}/nodes`
+}
+
+/**
+ * @summary Create a new node in a project
+ */
+export const createNode = async (projectId: number,
+    nodeInput: NodeInput, options?: RequestInit): Promise<GraphNode> => {
+
+  return customFetch<GraphNode>(getCreateNodeUrl(projectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(nodeInput)
+  }
+);}
+
+
+
+
+export const getCreateNodeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNode>>, TError,{projectId: number;data: BodyType<NodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createNode>>, TError,{projectId: number;data: BodyType<NodeInput>}, TContext> => {
+
+const mutationKey = ['createNode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createNode>>, {projectId: number;data: BodyType<NodeInput>}> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  createNode(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateNodeMutationResult = NonNullable<Awaited<ReturnType<typeof createNode>>>
+    export type CreateNodeMutationBody = BodyType<NodeInput>
+    export type CreateNodeMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new node in a project
+ */
+export const useCreateNode = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNode>>, TError,{projectId: number;data: BodyType<NodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createNode>>,
+        TError,
+        {projectId: number;data: BodyType<NodeInput>},
+        TContext
+      > => {
+      return useMutation(getCreateNodeMutationOptions(options));
+    }
+
+export const getDeleteNodeUrl = (projectId: number,
+    nodeId: string,) => {
+
+
+
+
+  return `/api/projects/${projectId}/nodes/${nodeId}`
+}
+
+/**
+ * @summary Delete a node and its children
+ */
+export const deleteNode = async (projectId: number,
+    nodeId: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteNodeUrl(projectId,nodeId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteNodeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNode>>, TError,{projectId: number;nodeId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteNode>>, TError,{projectId: number;nodeId: string}, TContext> => {
+
+const mutationKey = ['deleteNode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteNode>>, {projectId: number;nodeId: string}> = (props) => {
+          const {projectId,nodeId} = props ?? {};
+
+          return  deleteNode(projectId,nodeId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteNodeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteNode>>>
+
+    export type DeleteNodeMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a node and its children
+ */
+export const useDeleteNode = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNode>>, TError,{projectId: number;nodeId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteNode>>,
+        TError,
+        {projectId: number;nodeId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteNodeMutationOptions(options));
+    }
 
 export const getGetNodeUrl = (projectId: number,
     nodeId: string,) => {

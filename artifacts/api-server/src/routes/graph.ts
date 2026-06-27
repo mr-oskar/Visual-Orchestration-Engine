@@ -15,6 +15,9 @@ import {
   FetchNodeCodeParams,
   GetProjectStatsParams,
   GetProjectActivityParams,
+  CreateNodeParams,
+  CreateNodeBody,
+  DeleteNodeParams,
 } from "@workspace/api-zod";
 
 const router = Router();
@@ -68,6 +71,86 @@ router.get("/projects/:projectId/nodes", async (req, res) => {
   const nodes = await db.select().from(graphNodesTable).where(eq(graphNodesTable.projectId, projectId));
   res.json(nodes.map(parseNode));
 });
+
+router.post("/projects/:projectId/nodes", async (req, res) => {
+  const { projectId } = CreateNodeParams.parse({ projectId: Number(req.params.projectId) });
+  const body = CreateNodeBody.parse(req.body);
+
+  const NODE_DEFAULTS: Record<string, { width: number; height: number }> = {
+    folder: { width: 400, height: 300 },
+    file: { width: 300, height: 220 },
+    class: { width: 260, height: 180 },
+    function: { width: 200, height: 80 },
+  };
+  const defaults = NODE_DEFAULTS[body.nodeType] ?? { width: 200, height: 80 };
+
+  const id = `${body.nodeType}-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+  const [node] = await db.insert(graphNodesTable).values({
+    id,
+    projectId,
+    nodeType: body.nodeType,
+    label: body.label,
+    filePath: body.filePath,
+    parentNodeId: body.parentNodeId ?? null,
+    positionX: body.positionX ?? 100,
+    positionY: body.positionY ?? 100,
+    width: body.width ?? defaults.width,
+    height: body.height ?? defaults.height,
+    inputTypes: "[]",
+    outputTypes: "[]",
+    codeContent: body.codeContent ?? `# ${body.label}\n`,
+  }).returning();
+
+  await db.insert(activityEventsTable).values({
+    projectId,
+    eventType: "node_created",
+    description: `Created ${body.nodeType} "${body.label}"`,
+    nodeId: id,
+  });
+
+  res.status(201).json(parseNode(node));
+});
+
+router.delete("/projects/:projectId/nodes/:nodeId", async (req, res) => {
+  const { projectId, nodeId } = DeleteNodeParams.parse({
+    projectId: Number(req.params.projectId),
+    nodeId: req.params.nodeId,
+  });
+
+  // Recursively find and delete all descendants
+  const allNodes = await db.select().from(graphNodesTable).where(eq(graphNodesTable.projectId, projectId));
+  const toDelete = collectDescendants(nodeId, allNodes);
+  toDelete.push(nodeId);
+
+  for (const id of toDelete) {
+    await db.delete(graphEdgesTable).where(
+      and(eq(graphEdgesTable.projectId, projectId), eq(graphEdgesTable.sourceNodeId, id))
+    );
+    await db.delete(graphEdgesTable).where(
+      and(eq(graphEdgesTable.projectId, projectId), eq(graphEdgesTable.targetNodeId, id))
+    );
+    await db.delete(graphNodesTable).where(
+      and(eq(graphNodesTable.projectId, projectId), eq(graphNodesTable.id, id))
+    );
+  }
+
+  await db.insert(activityEventsTable).values({
+    projectId,
+    eventType: "node_deleted",
+    description: `Deleted node "${nodeId}" and ${toDelete.length - 1} descendant(s)`,
+    nodeId,
+  });
+
+  res.status(204).send();
+});
+
+function collectDescendants(
+  parentId: string,
+  allNodes: (typeof graphNodesTable.$inferSelect)[]
+): string[] {
+  const children = allNodes.filter((n) => n.parentNodeId === parentId);
+  return children.flatMap((c) => [c.id, ...collectDescendants(c.id, allNodes)]);
+}
 
 router.get("/projects/:projectId/nodes/:nodeId", async (req, res): Promise<void> => {
   const { projectId, nodeId } = GetNodeParams.parse({

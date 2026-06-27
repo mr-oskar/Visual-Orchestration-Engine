@@ -88,6 +88,20 @@ export interface NodeDetail {
   metadata: NodeMetadata;
 }
 
+export interface NodeInput {
+  /** folder | file | class | function */
+  nodeType: string;
+  label: string;
+  filePath: string;
+  /** @nullable */
+  parentNodeId?: string | null;
+  positionX?: number;
+  positionY?: number;
+  width?: number;
+  height?: number;
+  codeContent?: string;
+}
+
 export interface NodePositionUpdate {
   positionX?: number;
   positionY?: number;

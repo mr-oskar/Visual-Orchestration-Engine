@@ -136,8 +136,49 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GraphNode"
+    post:
+      operationId: createNode
+      tags: [graph]
+      summary: Create a new node in a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodeInput"
+      responses:
+        "201":
+          description: Created node
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphNode"
 
   /projects/{projectId}/nodes/{nodeId}:
+    delete:
+      operationId: deleteNode
+      tags: [graph]
+      summary: Delete a node and its children
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
     get:
       operationId: getNode
       tags: [graph]
@@ -447,6 +488,30 @@ components:
         complexity:
           type: string
         lastModified:
+          type: string
+
+    NodeInput:
+      type: object
+      required: [nodeType, label, filePath]
+      properties:
+        nodeType:
+          type: string
+          description: "folder | file | class | function"
+        label:
+          type: string
+        filePath:
+          type: string
+        parentNodeId:
+          type: ["string", "null"]
+        positionX:
+          type: number
+        positionY:
+          type: number
+        width:
+          type: number
+        height:
+          type: number
+        codeContent:
           type: string
 
     NodePositionUpdate:

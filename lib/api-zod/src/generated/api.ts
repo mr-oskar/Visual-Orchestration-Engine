@@ -157,6 +157,55 @@ export const ListNodesResponse = zod.array(ListNodesResponseItem)
 
 
 /**
+ * @summary Create a new node in a project
+ */
+export const CreateNodeParams = zod.object({
+  "projectId": zod.coerce.number()
+})
+
+export const CreateNodeBody = zod.object({
+  "nodeType": zod.string().describe('folder | file | class | function'),
+  "label": zod.string(),
+  "filePath": zod.string(),
+  "parentNodeId": zod.string().nullish(),
+  "positionX": zod.number().optional(),
+  "positionY": zod.number().optional(),
+  "width": zod.number().optional(),
+  "height": zod.number().optional(),
+  "codeContent": zod.string().optional()
+})
+
+export const CreateNodeResponse = zod.object({
+  "id": zod.string(),
+  "projectId": zod.number(),
+  "nodeType": zod.string().describe('folder | file | class | function'),
+  "label": zod.string(),
+  "filePath": zod.string(),
+  "parentNodeId": zod.string().nullish(),
+  "positionX": zod.number(),
+  "positionY": zod.number(),
+  "width": zod.number(),
+  "height": zod.number(),
+  "inputTypes": zod.array(zod.string()).optional(),
+  "outputTypes": zod.array(zod.string()).optional(),
+  "lineNumber": zod.number().nullish(),
+  "complexity": zod.number().nullish(),
+  "isCollapsed": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Delete a node and its children
+ */
+export const DeleteNodeParams = zod.object({
+  "projectId": zod.coerce.number(),
+  "nodeId": zod.coerce.string()
+})
+
+export const DeleteNodeResponse = zod.void()
+
+
+/**
  * @summary Get node details including code and metadata
  */
 export const GetNodeParams = zod.object({

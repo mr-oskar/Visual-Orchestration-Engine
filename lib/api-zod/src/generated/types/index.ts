@@ -13,6 +13,7 @@ export * from './graphEdge';
 export * from './graphNode';
 export * from './healthStatus';
 export * from './nodeDetail';
+export * from './nodeInput';
 export * from './nodeMetadata';
 export * from './nodePositionUpdate';
 export * from './project';

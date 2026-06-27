@@ -74,5 +74,10 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@types/dagre": "^0.7.54",
+    "dagre": "^0.8.5"
   }
 }
